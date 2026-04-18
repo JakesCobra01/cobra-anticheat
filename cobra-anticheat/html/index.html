@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cobra Anti-Cheat</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="overlay" class="hidden">
+
+  <!-- ── SIDEBAR ── -->
+  <aside id="sidebar">
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        </svg>
+      </div>
+      <div>
+        <div class="brand-name">COBRA AC</div>
+        <div class="brand-sub">v2.0 — COBRA DEVELOPMENT</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-btn active" data-tab="players">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Players
+        <span class="badge" id="badge-players">0</span>
+      </button>
+      <button class="nav-btn" data-tab="alerts">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        Alerts
+        <span class="badge red" id="badge-alerts">0</span>
+      </button>
+      <button class="nav-btn" data-tab="adminlog">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Admin Log
+        <span class="badge orange" id="badge-adminlog">0</span>
+      </button>
+      <button class="nav-btn" data-tab="bans">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+        Ban Manager
+      </button>
+      <button class="nav-btn" data-tab="config">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93L17.66 6.34A8 8 0 1 0 17.66 17.66L19.07 19.07A10 10 0 1 1 19.07 4.93z"/></svg>
+        Config
+      </button>
+    </nav>
+
+    <div class="sidebar-stats">
+      <div class="stat-row"><span class="stat-label">ONLINE</span><span class="stat-val green"  id="stat-online">0</span></div>
+      <div class="stat-row"><span class="stat-label">FLAGGED</span><span class="stat-val orange" id="stat-flagged">0</span></div>
+      <div class="stat-row"><span class="stat-label">BANNED TODAY</span><span class="stat-val red" id="stat-bans">0</span></div>
+      <div class="stat-row"><span class="stat-label">ADMIN ACTIONS</span><span class="stat-val" style="color:var(--accent)" id="stat-adminactions">0</span></div>
+    </div>
+
+    <button class="close-btn" onclick="closePanel()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      Close Panel
+    </button>
+  </aside>
+
+  <!-- ── MAIN CONTENT ── -->
+  <main id="content">
+
+    <!-- ─ PLAYERS TAB ─ -->
+    <div class="tab-pane active" id="tab-players">
+      <div class="tab-header">
+        <h1>Player Management</h1>
+        <div class="header-actions">
+          <input type="text" id="player-search" placeholder="Search name or ID…" class="search-input">
+          <button class="btn btn-secondary" onclick="refreshList()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+      <div id="player-list" class="player-grid"></div>
+
+      <!-- Player action modal -->
+      <div id="action-modal" class="modal hidden">
+        <div class="modal-box">
+          <div class="modal-header">
+            <h2 id="modal-player-name">Player Actions</h2>
+            <button onclick="closeModal()" class="modal-close">✕</button>
+          </div>
+          <div class="modal-body">
+            <div class="player-info-block" id="modal-info"></div>
+            <div class="action-grid">
+              <button class="action-btn warn"   onclick="modalAction('spectate')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>Spectate
+              </button>
+              <button class="action-btn info"   onclick="modalAction('teleportTo')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="3 11 22 2 13 21 11 13 3 11"/></svg>TP To
+              </button>
+              <button class="action-btn info"   onclick="modalAction('bring')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>Bring
+              </button>
+              <button class="action-btn warn"   onclick="toggleFreeze()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="2" x2="12" y2="22"/><line x1="2" y1="12" x2="22" y2="12"/><polyline points="7 17 12 12 17 17"/><polyline points="7 7 12 12 17 7"/></svg><span id="freeze-label">Freeze</span>
+              </button>
+              <button class="action-btn info"   onclick="modalAction('screenshot')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>Screenshot
+              </button>
+              <button class="action-btn info"   onclick="modalAction('clearFlags')">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>Clear Flags
+              </button>
+              <button class="action-btn danger" onclick="openKickModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>Kick
+              </button>
+              <button class="action-btn ban"    onclick="openBanModal()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>Ban
+              </button>
+            </div>
+            <div class="flags-section">
+              <h3>Detection Flags</h3>
+              <div id="modal-flags" class="flag-list"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kick modal -->
+      <div id="kick-modal" class="modal hidden">
+        <div class="modal-box small">
+          <div class="modal-header"><h2>Kick Player</h2><button onclick="closeKickModal()" class="modal-close">✕</button></div>
+          <div class="modal-body">
+            <label>Reason</label>
+            <input type="text" id="kick-reason" placeholder="Enter kick reason…" class="text-input">
+            <button class="btn btn-danger full-width" onclick="confirmKick()">Confirm Kick</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Ban modal -->
+      <div id="ban-modal" class="modal hidden">
+        <div class="modal-box small">
+          <div class="modal-header"><h2>Ban Player</h2><button onclick="closeBanModal()" class="modal-close">✕</button></div>
+          <div class="modal-body">
+            <label>Reason</label>
+            <input type="text" id="ban-reason" placeholder="Enter ban reason…" class="text-input">
+            <label>Duration in minutes (0 = permanent)</label>
+            <input type="number" id="ban-duration" value="0" min="0" class="text-input">
+            <button class="btn btn-danger full-width" onclick="confirmBan()">Confirm Ban</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ─ ALERTS TAB ─ -->
+    <div class="tab-pane" id="tab-alerts">
+      <div class="tab-header">
+        <h1>Detection Alerts</h1>
+        <div class="header-actions">
+          <select id="alert-filter" class="search-input" style="width:160px">
+            <option value="all">All Types</option>
+            <option value="blatant">Blatant Only</option>
+            <option value="suspicious">Suspicious Only</option>
+          </select>
+          <button class="btn btn-secondary" onclick="clearAlerts()">Clear Log</button>
+        </div>
+      </div>
+      <div id="alert-log" class="alert-log">
+        <div class="empty-state">No alerts yet. Alerts appear here in real-time.</div>
+      </div>
+    </div>
+
+    <!-- ─ ADMIN LOG TAB ─ -->
+    <div class="tab-pane" id="tab-adminlog">
+      <div class="tab-header">
+        <h1>Admin Audit Log</h1>
+        <div class="header-actions">
+          <input type="text" id="adminlog-search" placeholder="Search admin or action…" class="search-input">
+          <select id="adminlog-filter" class="search-input" style="width:160px">
+            <option value="all">All Sources</option>
+            <option value="panel">Panel</option>
+            <option value="command">Commands</option>
+            <option value="txadmin">txAdmin</option>
+            <option value="general">General Cmds</option>
+            <option value="system">System</option>
+          </select>
+          <button class="btn btn-secondary" onclick="refreshAdminLog()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+            Refresh
+          </button>
+        </div>
+      </div>
+      <div class="note-block" style="margin-bottom:14px">
+        Logs <strong>all</strong> admin actions — AC panel, chat commands, txAdmin web panel, and general server admin commands (ban, kick, heal, god, noclip, etc.). Persisted in <code>adminlog.json</code> and mirrored to Discord.
+      </div>
+      <div id="adminlog-list" class="alert-log">
+        <div class="empty-state">Click Refresh to load the admin log.</div>
+      </div>
+    </div>
+
+    <!-- ─ BAN MANAGER TAB ─ -->
+    <div class="tab-pane" id="tab-bans">
+      <div class="tab-header">
+        <h1>Ban Manager</h1>
+      </div>
+
+      <!-- Unban section -->
+      <div class="ban-form">
+        <h3>🔓 Unban Player</h3>
+        <p class="form-hint">Enter any identifier — license, steam, discord, fivem, or IP. Calls the txAdmin API directly.</p>
+        <div class="row-input">
+          <input type="text" id="unban-identifier"
+            placeholder="license:xxxx  |  steam:xxxx  |  discord:xxxx  |  ip:x.x.x.x"
+            class="text-input">
+          <button class="btn btn-success" onclick="submitUnban()">Unban</button>
+        </div>
+      </div>
+
+      <!-- Quick ban by identifier (offline player) -->
+      <div class="ban-form" style="margin-top:16px">
+        <h3>🔨 Ban Offline Player</h3>
+        <p class="form-hint">Ban a player who is no longer on the server by their identifier.</p>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <input type="text" id="offlineban-id"
+            placeholder="license:xxxx  or  steam:xxxx"
+            class="text-input" style="flex:2">
+          <input type="text" id="offlineban-reason"
+            placeholder="Reason"
+            class="text-input" style="flex:2">
+          <input type="number" id="offlineban-duration"
+            placeholder="Mins (0=perm)"
+            class="text-input" style="flex:1;min-width:120px" value="0" min="0">
+          <button class="btn btn-danger" onclick="submitOfflineBan()">Ban</button>
+        </div>
+      </div>
+
+      <div class="note-block" style="margin-top:16px">
+        <strong>txAdmin mode:</strong> All bans route through txAdmin. View the full ban list in the
+        <strong>txAdmin web panel → Players → Bans</strong>. You can also use
+        <code>/acban [id] [mins] [reason]</code> and <code>/acunban [identifier]</code> in chat.
+      </div>
+    </div>
+
+    <!-- ─ CONFIG TAB ─ -->
+    <div class="tab-pane" id="tab-config">
+      <div class="tab-header">
+        <h1>Detection Status</h1>
+      </div>
+      <div class="config-grid" id="config-grid"></div>
+      <div class="note-block" style="margin-bottom:2rem">
+        All detections are in <strong>TUNING MODE</strong> — alerts only, no automated kicks or bans.
+        Once thresholds are verified against your server's traffic, enable enforcement in <code>config.lua</code>.
+      </div>
+      <div class="tab-header"><h2>Active Thresholds</h2></div>
+      <div class="threshold-grid" id="threshold-grid"></div>
+    </div>
+
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>
